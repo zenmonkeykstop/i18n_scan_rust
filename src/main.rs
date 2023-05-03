@@ -1,4 +1,25 @@
 use clap::{ArgGroup, Parser};
+use serde::Deserialize;
+use reqwest::Error;
+use std::process;
+
+static WEBLATE_ENDPOINT: &str = "https://reblate.securedrop.org/api/projects/securedrop/languages/?format=json";
+
+
+#[derive(Deserialize, Debug)]
+struct Language {
+    language: String,
+    code: String,
+    total: u32,
+    translated: u32,
+    translated_percent: f64,
+    total_words: u32,
+    translated_words: u32,
+    translated_words_percent: f64,
+    total_chars: u32,
+    translated_chars: u32,
+    translated_chars_percent: f64,
+}
 
 #[derive(Parser)]
 #[command(author, version, about, long_about = None)]
@@ -30,7 +51,20 @@ struct Args {
     workers: u8,
 }
 
+fn get_weblate_data() -> Result<Vec<Language>, Error> {
+    let mut r = reqwest::blocking::get(WEBLATE_ENDPOINT);
+    let languages = r?.json();
+    return languages;
+}
+
 fn main() {
+    let weblate_data = match get_weblate_data() {
+        Ok(weblate_data) => println!("Found {:?} languages on Weblate!", weblate_data.len()),
+        Err(e) => {
+            eprintln!("Error retrieving Weblate info: {:?}", e);
+            process::exit(1);
+        },
+    };
     let args = Args::parse();
     println!("Use directory? {}!", args.directory);
     if let Some(filename) = args.filename.as_deref() {
