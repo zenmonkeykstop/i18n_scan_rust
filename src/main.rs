@@ -8,6 +8,7 @@ use hyper::body::Buf;
 use hyper::Client;
 use hyper_tls::HttpsConnector;
 
+// cargo culting this line from hyper example
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
 
 static WEBLATE_ENDPOINT: &str = "https://weblate.securedrop.org/api/projects/securedrop/languages/?format=json";
@@ -45,8 +46,7 @@ struct Listing {
 struct Args {
     // Specify a file of onion URLs to check, one per line
     #[arg(short, long)]
-    filename: Option<String>,   //The Option<> bit is how you specify that the arg is..optional
-    // Took too long to realise that, not sure if I feel dumb or annoyed
+    filename: Option<String>,
 
     // Check onion URLs listed in https://securedrop.org/directory
     #[arg(short, long)]
@@ -79,9 +79,15 @@ async fn get_weblate_data() -> Result<Vec<Language>> {
     Ok(languages)
 }
 
-// fn get_directory_data() -> Result<Vec<Listing>, Error> {
+// This was just a global in the Python version, let's grab it from the source
+// repo instead.
+fn get_supported_locales() -> Result<Vec<Locale>> {
+   
+}
+fn get_directory_data() -> Result<Vec<Listing>> {
 
-// }
+
+}
 
 #[tokio::main]
 async fn main() -> Result<()> {
